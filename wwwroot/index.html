@@ -95,10 +95,20 @@
 
         function ping(mode = undefined) {
             if (mode === 'frontpage') {
-                fetch('/api/log/frontpage', { method: 'POST' });
+                // fetch('/api/log/frontpage', { method: 'POST' });
+
+                const xmlHttpRequest = new XMLHttpRequest();
+                xmlHttpRequest.open('POST', '/api/log/frontpage', true);
+                xmlHttpRequest.send();
             }
-            fetch('/api/log/ping', { method: 'POST' }).then(() =>
-                setTimeout(() => ping(), 10000));
+
+            // fetch('/api/log/ping', { method: 'POST' }).then(() =>
+            //    setTimeout(() => ping(), 10000));
+
+            const xmlHttpRequest = new XMLHttpRequest();
+            xmlHttpRequest.open('POST', '/api/log/ping', true);
+            xmlHttpRequest.onload = () => setTimeout(() => ping(), 5000);
+            xmlHttpRequest.send();
         }
 
         loadSymbols();

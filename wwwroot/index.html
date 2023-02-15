@@ -18,6 +18,30 @@
             });
             return instance;
         }
+
+        const originalFetch = window.fetch;
+        window.fetch = function() {
+            const request = arguments[0]?.constructor === Request ? arguments[0] : undefined;
+            const url = request?.url ?? arguments[0];
+            console.log(`fetch called for url "${url}".`);
+            return new Promise((resolve, reject) => {
+                originalFetch
+                    .apply(this, arguments)
+                    .then(function() {
+                        const response = arguments[0];
+                        console.log(`fetch returned for url "${url}" with status ${response.status} ${response.statusText}.`);
+                        resolve.apply(this, arguments);
+                    })
+                    .catch(function() {
+                        const error = arguments[0];
+                        console.log(`fetch fail for url "${url}": ${error}`);
+                        reject.apply(this, arguments);
+                    })
+                    .finally(function() {
+                        console.log(`fetch finished for url "${url}".`);
+                    });
+            });
+        }
     </script>
 </head>
 <body>

@@ -1,34 +1,81 @@
-<img src="https://storage.googleapis.com/golden-wind/experts-club/capa-github.svg" />
+<img src="https://drive.google.com/uc?id=1XPWLjUo2-j8iGw07ALcxu7oqJ3nkl2Ho" alt="Rocketseat+"/>
 
-# NodeJS e ElasticSearch: Persistindo mensagens do console.log no banco de dados
+# Interceptando requisições HTTP no JavaScript
 
-Não existe dev de JavaScript nesse mundo que não conheça o `console.log()`! Todo mundo usa. Mas uma coisa legal seria gravar as mensagens de log em um banco de dados para consulta posterior. Seja para investigar bugs ou ajudar na tomada de decisão em relação a novas funcionalidades da aplicação. Mas neste caso estou falando de logs do lado do servidor. O `console.log()` do navegador (Chrome, Edge, Firefox, etc.) continua lá como sempre esteve, mas no backend com NodeJS podemos seguir com essa abordagem.
+Esta aula da coleção Rocketseat+ foi feita com base no [código-fonte](https://github.com/rocketseat-creators-program/app-javascript-elasticsearch-persist-log-2022-02-13) de outra aula (*NodeJS e ElasticSearch: Persistindo mensagens do console.log no banco de dados*)
 
-**O código-fonte que temos aqui é didático.** Uma pequena aplicação com frontend estático (apenas um `index.html`) que se comunica com uma api servida pelo *express* do NodeJS. É um conversor de criptomoedas que usa a API aberta da *Binance* em [api2.binance.com/api/v3/ticker/24hr](https://api2.binance.com/api/v3/ticker/24hr/).
+Esta aula buscou usar um aplicativo pronto que fazia requisições com `XMLHttpRequest` e `fetch`. Desta forma seria possível interceptá-los.
 
-Sendo uma aplicação tipo NPM, para executar use a sequência de comandos a seguir:
+# Execução do app
 
-```
+Para executar o aplicativo deste código-fonte use:
+
+```bash
 npm install
 npm start
 ```
 
-<img src="assets/install-and-running.png" width="100%" />
+Então abra o seu navegador no endereço http://localhost:3000/
 
-*Figura 1: Output da instalação e execução via NPM.*
+# Trecho de código
 
-Em seguida abra a aplicação na url [http://localhost:3000/](http://localhost:3000/) em seu navegador de internet.
+## XMLHttpRequest
 
-<img src="assets/webapp.png" width="100%" />
+Seque o código de interceptação para o `XMLHttpRequest`.
+Basta copiar e colar no Console de um navegador de internet.
+Foi testado no Chrome e Edge.
 
-*Figura 2: Tela do aplicativo web.*
+```javascript
+const originalXMLHttpRequest = window.XMLHttpRequest;
+window.XMLHttpRequest = function() {
+    console.log(`XMLHttpRequest created`);
+    const instance = new originalXMLHttpRequest(...Array.from(arguments));
+    instance.addEventListener("readystatechange", function() {
+        console.log(`XMLHttpRequest for url "${this.responseURL}". State changed to: ${this.readyState}`);
+    });
+    return instance;
+}
+```
 
-## Material de apoio
+## fetch
 
-O ebook com o passo-a-passo para montagem de um ambiente Elasticsearch e exemplos de código em JavaScript para trabalhar com o banco de dados está nesses links:
+Interceptação para a função `fetch`.
+Funciona igual ao trecho de código anterior: copiar e colar.
 
-- [ebooks.sergiocabral.com/nodejs-elasticsearch-logging](https://ebooks.sergiocabral.com/nodejs-elasticsearch-logging)
-- [ebooks.sergiocabral.com/nodejs-elasticsearch-logging.pdf](https://ebooks.sergiocabral.com/nodejs-elasticsearch-logging.pdf)
+```javascript
+const originalFetch = window.fetch;
+window.fetch = function() {
+    const request = arguments[0]?.constructor === Request ? arguments[0] : undefined;
+    const url = request?.url ?? arguments[0];
+    console.log(`fetch called for url "${url}".`);
+    return new Promise((resolve, reject) => {
+        originalFetch
+            .apply(this, arguments)
+            .then(function() {
+                const response = arguments[0];
+                console.log(`fetch returned for url "${url}" with status ${response.status} ${response.statusText}.`);
+                resolve.apply(this, arguments);
+            })
+            .catch(function() {
+                const error = arguments[0];
+                console.log(`fetch fail for url "${url}": ${error}`);
+                reject.apply(this, arguments);
+            })
+            .finally(function() {
+                console.log(`fetch finished for url "${url}".`);
+            });
+    });
+}
+```
+## Slides da aula
+
+<img src="assets/Slide1.PNG" width="100%" />
+
+<img src="assets/Slide2.PNG" width="100%" />
+
+<img src="assets/Slide3.PNG" width="100%" />
+
+<img src="assets/Slide4.PNG" width="100%" />
 
 ## Expert
 

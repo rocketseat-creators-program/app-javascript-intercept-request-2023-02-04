@@ -256,7 +256,7 @@ class App {
 }
 
 try {
-    new ElasticsearchLogger().configure();
+    // new ElasticsearchLogger().configure();
 } catch (error) {
     console.error(`Ocorreu um erro ao configurar o ElasticsearchLogger. ${error?.message ?? error}`, { error });
 }
